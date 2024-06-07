@@ -35,7 +35,6 @@ repos:
           - flake8-tidy-imports
           - flake8-typing-imports
           - flake8-use-pathlib
-          - flake8-docstrings
           - flake8-pytest-style
 
   - repo: https://github.com/pre-commit/mirrors-mypy
