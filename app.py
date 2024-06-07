@@ -1,3 +1,4 @@
+from parse import parse
 from webob import Request, Response
 
 
@@ -13,9 +14,9 @@ class TurboHTTP:
     def handle_request(self, request):
         response = Response()
 
-        handler = self.find_handler(request)
+        handler, kwargs = self.find_handler(request)
         if handler is not None:
-            handler(request, response)
+            handler(request, response, **kwargs)
             response.status_code = 200
         else:
             response = self.default_response(response)
@@ -23,10 +24,12 @@ class TurboHTTP:
         return response
 
     def find_handler(self, request):
-        try:
-            return self.routes[request.path]
-        except KeyError:
-            return None
+        for path, handler in self.routes.items():
+            parsed_result = parse(path, request.path)
+            if path == request.path or parsed_result is not None:
+                return handler, parsed_result.named
+
+        return None, None
 
     def default_response(self, response):
         response.status_code = 404
