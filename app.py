@@ -8,8 +8,8 @@ class TurboHTTP:
         return response(environ, start_response)
 
     def handle_request(self, request):
-        user_agent = request.headers.get('User-Agent', "Unknown")
+        user_agent = request.headers.get("User-Agent", "Unknown")
         response = Response()
         response.status_code = 200
-        response.text = f'Hello, {user_agent}!'
+        response.text = f"Hello, {user_agent}!"
         return response
