@@ -1,4 +1,7 @@
 import inspect
+import requests
+import wsgiadapter
+
 from parse import parse
 from webob import Request, Response
 
@@ -43,7 +46,7 @@ class TurboHTTP:
             if handler_method:
                 handler_method(request, response, **kwargs)
             else:
-                self.method_not_allowed_response(response)
+                return self.method_not_allowed_response(response)
         else:
             handler(request, response, **kwargs)
 
@@ -62,3 +65,8 @@ class TurboHTTP:
             return handler
 
         return wrapper
+
+    def test_session(self):
+        session = requests.Session()
+        session.mount("http://testserver", wsgiadapter.WSGIAdapter(self))
+        return session
