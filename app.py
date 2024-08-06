@@ -59,7 +59,8 @@ class TurboHTTP:
         response.text = "Method Not Allowed"
 
     def add_route(self, path, handler, methods=None):
-        assert path not in self.routes, f"Route already exists: {path}"
+        if path in self.routes:
+            raise ValueError(f"Route already exists: {path}")
 
         if methods is None:
             methods = ['GET']
@@ -71,13 +72,8 @@ class TurboHTTP:
         if path in self.routes:
             raise ValueError(f"Route already exists: {path}")
 
-        if methods is None:
-            methods = ['GET']
-
-        methods = [method.upper() for method in methods]
-
         def wrapper(handler):
-            self.routes[path] = (handler, methods)
+            self.add_route(path, handler, methods)
             return handler
 
         return wrapper
