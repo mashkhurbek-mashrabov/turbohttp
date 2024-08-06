@@ -1,7 +1,6 @@
 import inspect
 import requests
 import wsgiadapter
-
 from parse import parse
 from webob import Request, Response
 
@@ -17,21 +16,24 @@ class TurboHTTP:
 
     def handle_request(self, request):
         response = Response()
-        handler, kwargs = self.find_handler(request)
+        handler, allowed_methods, kwargs = self.find_handler(request)
 
         if handler:
-            self.execute_handler(handler, request, response, **kwargs)
+            if request.method in allowed_methods:
+                self.execute_handler(handler, request, response, **kwargs)
+            else:
+                self.method_not_allowed_response(response)
         else:
             self.default_response(response)
 
         return response
 
     def find_handler(self, request):
-        for path, handler in self.routes.items():
+        for path, (handler, allowed_methods) in self.routes.items():
             parsed_result = parse(path, request.path)
             if path == request.path or parsed_result:
-                return handler, parsed_result.named if parsed_result else {}
-        return None, {}
+                return handler, allowed_methods, (parsed_result.named if parsed_result else {})
+        return None, [], {}
 
     def default_response(self, response):
         response.status_code = 404
@@ -56,12 +58,17 @@ class TurboHTTP:
         response.status_code = 405
         response.text = "Method Not Allowed"
 
-    def route(self, path):
+    def route(self, path, methods=None):
         if path in self.routes:
             raise ValueError(f"Route already exists: {path}")
 
+        if methods is None:
+            methods = ['GET']
+
+        methods = [method.upper() for method in methods]
+
         def wrapper(handler):
-            self.routes[path] = handler
+            self.routes[path] = (handler, methods)
             return handler
 
         return wrapper

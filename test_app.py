@@ -56,17 +56,18 @@ def test_class_based_get(app, test_client):
 
 
 def test_class_based_post(app, test_client):
-    @app.route("/books")
+    @app.route("/books", methods=["POST"])
     class Books:
         def post(self, request, response):
             response.text = "Books Post Page"
 
     response = test_client.post("http://testserver/books")
+    assert response.status_code == 200
     assert response.text == "Books Post Page"
 
 
 def test_class_based_get_and_post(app, test_client):
-    @app.route("/books")
+    @app.route("/books", methods=["GET", "POST"])
     class Books:
         def get(self, request, response):
             response.text = "Books Page"
@@ -75,9 +76,11 @@ def test_class_based_get_and_post(app, test_client):
             response.text = "Books Post Page"
 
     response = test_client.get("http://testserver/books")
+    assert response.status_code == 200
     assert response.text == "Books Page"
 
     response = test_client.post("http://testserver/books")
+    assert response.status_code == 200
     assert response.text == "Books Post Page"
 
 

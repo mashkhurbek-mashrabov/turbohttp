@@ -3,7 +3,7 @@ from app import TurboHTTP
 app = TurboHTTP()
 
 
-@app.route("/")
+@app.route("/", methods=["GET"])
 def home(request, response):
     response.text = "Hello, World!"
     return response
