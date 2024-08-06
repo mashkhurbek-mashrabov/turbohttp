@@ -28,3 +28,10 @@ class Books:
 
     def post(self, request, response):
         response.text = "Books Post Page"
+
+
+def new_handler(request, response):
+    response.text = "From New Handler"
+
+
+app.add_route("/new", new_handler)
