@@ -59,6 +59,8 @@ class TurboHTTP:
         response.text = "Method Not Allowed"
 
     def add_route(self, path, handler, methods=None):
+        assert path not in self.routes, f"Route already exists: {path}"
+
         if methods is None:
             methods = ['GET']
 
