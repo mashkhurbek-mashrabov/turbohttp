@@ -1,13 +1,18 @@
+import os
 import inspect
 import requests
 import wsgiadapter
 from parse import parse
 from webob import Request, Response
+from jinja2 import Environment, FileSystemLoader
 
 
 class TurboHTTP:
-    def __init__(self):
+    def __init__(self, template_dir="templates"):
         self.routes = {}
+
+        loader = FileSystemLoader(os.path.abspath(template_dir))
+        self.jinja_env = Environment(loader=loader)
 
     def __call__(self, environ, start_response):
         request = Request(environ)
@@ -82,3 +87,9 @@ class TurboHTTP:
         session = requests.Session()
         session.mount("http://testserver", wsgiadapter.WSGIAdapter(self))
         return session
+
+    def template(self, template_name, context: dict = None):
+        if context is None:
+            context = {}
+        template = self.jinja_env.get_template(template_name)
+        return template.render(**context).encode()

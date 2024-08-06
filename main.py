@@ -34,4 +34,10 @@ def new_handler(request, response):
     response.text = "From New Handler"
 
 
+@app.route("/template")
+def template_handler(request, response):
+    response.body = app.template("home.html",
+                                 context={"title": "New Title", 'body': "New Body"})
+
+
 app.add_route("/new", new_handler)

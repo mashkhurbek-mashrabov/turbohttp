@@ -103,3 +103,15 @@ def test_add_route(app, test_client):
 
     response = test_client.get("http://testserver/new")
     assert response.text == "From New Handler"
+
+
+def test_template_rendering(app, test_client):
+    @app.route("/template")
+    def template(request, response):
+        response.body = app.template("home.html",
+                                     context={"title": "Test Title", 'body': "Test Body"})
+
+    response = test_client.get("http://testserver/template")
+    assert "Test Title" in response.text
+    assert "Test Body" in response.text
+    assert "text/html" in response.headers["Content-Type"]
