@@ -10,6 +10,7 @@ from jinja2 import Environment, FileSystemLoader
 class TurboHTTP:
     def __init__(self, template_dir="templates"):
         self.routes = {}
+        self.exception_handler = None
 
         loader = FileSystemLoader(os.path.abspath(template_dir))
         self.jinja_env = Environment(loader=loader)
@@ -51,11 +52,23 @@ class TurboHTTP:
             method_name = request.method.lower()
             handler_method = getattr(handler_instance, method_name, None)
             if handler_method:
-                handler_method(request, response, **kwargs)
+                try:
+                    handler_method(request, response, **kwargs)
+                except Exception as e:
+                    if self.exception_handler:
+                        self.exception_handler(request, response, e)
+                    else:
+                        raise e
             else:
                 return self.method_not_allowed_response(response)
         else:
-            handler(request, response, **kwargs)
+            try:
+                handler(request, response, **kwargs)
+            except Exception as e:
+                if self.exception_handler:
+                    self.exception_handler(request, response, e)
+                else:
+                    raise e
 
         response.status_code = 200
 
@@ -93,3 +106,6 @@ class TurboHTTP:
             context = {}
         template = self.jinja_env.get_template(template_name)
         return template.render(**context).encode()
+
+    def add_exception_handler(self, handler):
+        self.exception_handler = handler

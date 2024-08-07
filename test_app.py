@@ -115,3 +115,13 @@ def test_template_rendering(app, test_client):
     assert "Test Title" in response.text
     assert "Test Body" in response.text
     assert "text/html" in response.headers["Content-Type"]
+
+
+def test_custom_exception_handler(app, test_client):
+    def on_exception(request, response, exception):
+        response.text = "Something went wrong"
+
+    app.add_exception_handler(on_exception)
+
+    response = test_client.get("http://testserver/nonexistent")
+    assert response.text == "Something went wrong"
