@@ -2,20 +2,26 @@ import os
 import inspect
 import requests
 import wsgiadapter
+from whitenoise import WhiteNoise
 from parse import parse
 from webob import Request, Response
 from jinja2 import Environment, FileSystemLoader
 
 
 class TurboHTTP:
-    def __init__(self, template_dir="templates"):
+    def __init__(self, template_dir="templates", static_dir="static"):
         self.routes = {}
         self.exception_handler = None
 
         loader = FileSystemLoader(os.path.abspath(template_dir))
         self.jinja_env = Environment(loader=loader)
 
+        self.whitenoise = WhiteNoise(self.wsgi_app, root=os.path.abspath(static_dir))
+
     def __call__(self, environ, start_response):
+        return self.whitenoise(environ, start_response)
+
+    def wsgi_app(self, environ, start_response):
         request = Request(environ)
         response = self.handle_request(request)
         return response(environ, start_response)

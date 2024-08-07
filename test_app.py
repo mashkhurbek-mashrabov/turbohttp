@@ -119,9 +119,24 @@ def test_template_rendering(app, test_client):
 
 def test_custom_exception_handler(app, test_client):
     def on_exception(request, response, exception):
-        response.text = "Something went wrong"
+        response.text = str(exception)
 
     app.add_exception_handler(on_exception)
 
-    response = test_client.get("http://testserver/nonexistent")
+    @app.route("/exception")
+    def exception_handler(request, response):
+        raise Exception("Something went wrong")
+
+    response = test_client.get("http://testserver/exception")
     assert response.text == "Something went wrong"
+
+
+def test_non_existent_static_file(test_client):
+    response = test_client.get("http://testserver/nonexistent.css")
+    assert response.status_code == 404
+
+
+def test_serving_static_file(test_client):
+    response = test_client.get("http://testserver/test.css")
+    assert response.status_code == 200
+    assert response.text == "body {background-color: red;}"
