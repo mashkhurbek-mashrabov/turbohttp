@@ -1,4 +1,5 @@
 from app import TurboHTTP
+from middleware import Middleware
 
 app = TurboHTTP()
 
@@ -49,5 +50,15 @@ def on_exception(request, response, exception):
     response.text = str(exception)
 
 
+class LoggingMiddleware(Middleware):
+    def process_request(self, request):
+        print(f"[{request.method}] {request.path}")
+        print("Before Request")
+
+    def process_response(self, request, response):
+        print("After Request")
+
+
+app.add_middleware(LoggingMiddleware)
 app.add_exception_handler(on_exception)
 app.add_route("/new", new_handler)

@@ -6,20 +6,26 @@ from whitenoise import WhiteNoise
 from parse import parse
 from webob import Request, Response
 from jinja2 import Environment, FileSystemLoader
+from middleware import Middleware
 
 
 class TurboHTTP:
-    def __init__(self, template_dir="templates", static_dir="static"):
+    def __init__(self, template_dir="templates", static_dir="static", static_prefix="/static"):
         self.routes = {}
         self.exception_handler = None
+        self.static_prefix = static_prefix
 
         loader = FileSystemLoader(os.path.abspath(template_dir))
         self.jinja_env = Environment(loader=loader)
 
-        self.whitenoise = WhiteNoise(self.wsgi_app, root=os.path.abspath(static_dir))
+        self.whitenoise = WhiteNoise(self.wsgi_app, root=os.path.abspath(static_dir), prefix=static_prefix)
+
+        self.middleware = Middleware(self)
 
     def __call__(self, environ, start_response):
-        return self.whitenoise(environ, start_response)
+        if environ['PATH_INFO'].startswith(self.static_prefix):
+            return self.whitenoise(environ, start_response)
+        return self.middleware(environ, start_response)
 
     def wsgi_app(self, environ, start_response):
         request = Request(environ)
@@ -115,3 +121,6 @@ class TurboHTTP:
 
     def add_exception_handler(self, handler):
         self.exception_handler = handler
+
+    def add_middleware(self, middleware):
+        self.middleware.add(middleware)
