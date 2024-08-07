@@ -38,7 +38,7 @@ class TurboHTTP:
 
         if handler:
             if request.method in allowed_methods:
-                self.execute_handler(handler, request, response, **kwargs)
+                self.execute_handler(handler, request, response, allowed_methods, **kwargs)
             else:
                 self.method_not_allowed_response(response)
         else:
@@ -58,10 +58,10 @@ class TurboHTTP:
         response.text = "Not Found"
         return response
 
-    def execute_handler(self, handler, request, response, **kwargs):
+    def execute_handler(self, handler, request, response, allowed_methods=None, **kwargs):
         if inspect.isclass(handler):
-            handler_instance = handler()
             method_name = request.method.lower()
+            handler_instance = handler()
             handler_method = getattr(handler_instance, method_name, None)
             if handler_method:
                 try:
@@ -75,7 +75,10 @@ class TurboHTTP:
                 return self.method_not_allowed_response(response)
         else:
             try:
-                handler(request, response, **kwargs)
+                if request.method.upper() in allowed_methods:
+                    handler(request, response, **kwargs)
+                else:
+                    self.method_not_allowed_response(response)
             except Exception as e:
                 if self.exception_handler:
                     self.exception_handler(request, response, e)
@@ -93,15 +96,12 @@ class TurboHTTP:
             raise ValueError(f"Route already exists: {path}")
 
         if methods is None:
-            methods = ['GET']
+            methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD', 'CONNECT', 'TRACE']
 
         methods = [method.upper() for method in methods]
         self.routes[path] = (handler, methods)
 
     def route(self, path, methods=None):
-        if path in self.routes:
-            raise ValueError(f"Route already exists: {path}")
-
         def wrapper(handler):
             self.add_route(path, handler, methods)
             return handler
