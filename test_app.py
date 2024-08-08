@@ -169,3 +169,36 @@ def test_middleware_methods_are_called(app, test_client):
 
     assert process_request_called
     assert process_response_called
+
+
+def test_json_response_helper(app, test_client):
+    @app.route("/json")
+    def json(request, response):
+        response.json = {"hello": "world"}
+
+    response = test_client.get("http://testserver/json")
+    res_data = response.json()
+
+    assert response.headers["Content-Type"] == "application/json"
+    assert res_data["hello"] == "world"
+
+
+def test_text_response_helper(app, test_client):
+    @app.route("/text")
+    def text(request, response):
+        response.text = "Hello, World!"
+
+    response = test_client.get("http://testserver/text")
+    assert "text/plain" in response.headers["Content-Type"]
+    assert response.text == "Hello, World!"
+
+
+def test_html_response_helper(app, test_client):
+    @app.route("/html")
+    def html(request, response):
+        response.html = "<h1>Hello, World!</h1>"
+
+    response = test_client.get("http://testserver/html")
+
+    assert "text/html" in response.headers["Content-Type"]
+    assert response.text == "<h1>Hello, World!</h1>"

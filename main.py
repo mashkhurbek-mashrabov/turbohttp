@@ -59,6 +59,11 @@ class LoggingMiddleware(Middleware):
         print("After Request")
 
 
+@app.route("/json")
+def json_handler(request, response):
+    response.json = {"hello": "world"}
+
+
 app.add_middleware(LoggingMiddleware)
 app.add_exception_handler(on_exception)
 app.add_route("/new", new_handler)

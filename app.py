@@ -4,7 +4,8 @@ import requests
 import wsgiadapter
 from whitenoise import WhiteNoise
 from parse import parse
-from webob import Request, Response
+from webob import Request
+from response import Response
 from jinja2 import Environment, FileSystemLoader
 from middleware import Middleware
 
@@ -117,7 +118,7 @@ class TurboHTTP:
         if context is None:
             context = {}
         template = self.jinja_env.get_template(template_name)
-        return template.render(**context).encode()
+        return template.render(**context)
 
     def add_exception_handler(self, handler):
         self.exception_handler = handler
