@@ -1,6 +1,7 @@
+import os
 import pytest
 
-from app import TurboHTTP
+from turbohttp.app import TurboHTTP
 
 
 @pytest.fixture

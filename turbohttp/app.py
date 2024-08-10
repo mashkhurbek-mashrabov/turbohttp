@@ -5,9 +5,9 @@ import wsgiadapter
 from whitenoise import WhiteNoise
 from parse import parse
 from webob import Request
-from response import Response
+from .response import Response
 from jinja2 import Environment, FileSystemLoader
-from middleware import Middleware
+from .middleware import Middleware
 
 
 class TurboHTTP:

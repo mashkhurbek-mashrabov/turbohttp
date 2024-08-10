@@ -1,5 +1,5 @@
 import pytest
-from middleware import Middleware
+from turbohttp.middleware import Middleware
 
 
 def test_basic_route_adding(app):
@@ -109,7 +109,7 @@ def test_add_route(app, test_client):
 def test_template_rendering(app, test_client):
     @app.route("/template")
     def template(request, response):
-        response.body = app.template("home.html",
+        response.body = app.template("test.html",
                                      context={"title": "Test Title", 'body': "Test Body"})
 
     response = test_client.get("http://testserver/template")

@@ -1,5 +1,5 @@
-from app import TurboHTTP
-from middleware import Middleware
+from turbohttp.app import TurboHTTP
+from turbohttp.middleware import Middleware
 
 app = TurboHTTP()
 
